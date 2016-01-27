@@ -20,7 +20,7 @@ public class LM_Fragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState)
     {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.landscape_mode_fragement, container, false);
+        return inflater.inflate(R.layout.fragment_landscape_mode, container, false);
     }
 
 

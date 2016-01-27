@@ -44,6 +44,7 @@ import com.mikepenz.materialdrawer.model.interfaces.Nameable;
 import com.mikepenz.octicons_typeface_library.Octicons;
 
 public class MiniDrawerActivity extends AppCompatActivity {
+
     private static final int PROFILE_SETTING = 1;
 
     //save our header or result
@@ -51,6 +52,7 @@ public class MiniDrawerActivity extends AppCompatActivity {
     private Drawer result = null;
     private MiniDrawer miniResult = null;
     private Crossfader crossFader;
+
 
     protected void updateFragment(Fragment fragment)
     {
@@ -63,6 +65,7 @@ public class MiniDrawerActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mini_drawer);
 
@@ -155,6 +158,18 @@ public class MiniDrawerActivity extends AppCompatActivity {
 
     }
 
+    final static int ID__STATIC_FRAGMENT_PM = 3;
+    final static int ID__STATIC_FRAGMENT_LM = 4;
+
+    private PrimaryDrawerItem getPrimaryDrawerItem(int itemDisplayTextId, FontAwesome.Icon iconId, int identifier) {
+
+        return new PrimaryDrawerItem()
+                .withName(itemDisplayTextId) // eg: R.string.fragment_layout_cycler
+                .withIcon(iconId)            // eg: FontAwesome.Icon.faw_gamepad
+                .withIdentifier(identifier) // eg: ID__STATIC_FRAGMENT_PM
+            ;
+    }
+
     private void buildDrawer(Bundle savedInstanceState, Toolbar toolbar) {
 
         result = new DrawerBuilder()
@@ -163,8 +178,15 @@ public class MiniDrawerActivity extends AppCompatActivity {
                 .withTranslucentStatusBar(false)
                 .withAccountHeader(headerResult) //set the AccountHeader we created earlier for the header
                 .addDrawerItems(
-                        new PrimaryDrawerItem().withName(R.string.drawer_item_multi_drawer).withIcon(FontAwesome.Icon.faw_gamepad).withIdentifier(3),
-                        new PrimaryDrawerItem().withName(R.string.drawer_item_non_translucent_status_drawer).withIcon(FontAwesome.Icon.faw_eye).withIdentifier(4),
+
+                        getPrimaryDrawerItem(R.string.fragment_static_pm,
+                                                FontAwesome.Icon.faw_gamepad,
+                                                ID__STATIC_FRAGMENT_PM),
+
+                        getPrimaryDrawerItem(R.string.fragment_static_lm,
+                                                FontAwesome.Icon.faw_eye,
+                                                ID__STATIC_FRAGMENT_LM),
+
                         new DividerDrawerItem(),
                         new SwitchDrawerItem().withName("Switch").withIcon(Octicons.Icon.oct_tools).withChecked(true).withOnCheckedChangeListener(onCheckedChangeListener),
                         new ToggleDrawerItem().withName("Toggle").withIcon(Octicons.Icon.oct_tools).withChecked(true).withOnCheckedChangeListener(onCheckedChangeListener)
@@ -190,13 +212,15 @@ public class MiniDrawerActivity extends AppCompatActivity {
                                     Toast.LENGTH_SHORT
                             ).show();
 
-                            if (drawerItemIdentifier == 3) {
+                            if (drawerItemIdentifier == ID__STATIC_FRAGMENT_PM) {
 
                                 Fragment fragment  = new PM_Fragment();
                                 updateFragment(fragment);
                             }
 
-                            if (drawerItemIdentifier == 4) {
+                            if (drawerItemIdentifier == ID__STATIC_FRAGMENT_LM) {
+
+                                // Toast.makeText(activity.getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 
                                 Fragment fragment  = new LM_Fragment();
                                 updateFragment(fragment);

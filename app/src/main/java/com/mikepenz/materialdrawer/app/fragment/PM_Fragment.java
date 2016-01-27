@@ -20,7 +20,7 @@ public class PM_Fragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState)
     {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.portrait_mode_fragement, container, false);
+        return inflater.inflate(R.layout.fragment_portrait_mode, container, false);
     }
 
 
