@@ -1,6 +1,5 @@
 package com.mikepenz.materialdrawer.app;
 
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.net.Uri;
@@ -32,14 +31,11 @@ import com.mikepenz.materialdrawer.app.fragment.LM_Fragment;
 import com.mikepenz.materialdrawer.app.fragment.PM_Fragment;
 import com.mikepenz.materialdrawer.app.utils.CrossfadeWrapper;
 import com.mikepenz.materialdrawer.app.utils.SystemUtils;
-import com.mikepenz.materialdrawer.holder.BadgeStyle;
 import com.mikepenz.materialdrawer.interfaces.OnCheckedChangeListener;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileSettingDrawerItem;
-import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
-import com.mikepenz.materialdrawer.model.SectionDrawerItem;
 import com.mikepenz.materialdrawer.model.SwitchDrawerItem;
 import com.mikepenz.materialdrawer.model.ToggleDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
@@ -73,9 +69,43 @@ public class MiniDrawerActivity extends AppCompatActivity {
         // Handle Toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
         //set the back arrow in the toolbar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(R.string.drawer_item_mini_drawer);
+
+        // Create the AccountHeader
+        // createAccountHeader(savedInstanceState);
+
+        buildDrawer(savedInstanceState, toolbar);
+
+        //the MiniDrawer is managed by the Drawer and we just get it to hook it into the Crossfader
+        miniResult = result.getMiniDrawer();
+
+        //get the widths in px for the first and second panel
+        int firstWidth = (int) UIUtils.convertDpToPixel(300, this);
+        int secondWidth = (int) UIUtils.convertDpToPixel(72, this);
+
+        //create and build our crossfader (see the MiniDrawer is also builded in here, as the build method returns the view to be used in the crossfader)
+        //the crossfader library can be found here: https://github.com/mikepenz/Crossfader
+
+        crossFader = new Crossfader()
+                .withContent(findViewById(R.id.fragment_container)) // crossfade_content))
+                .withFirst(result.getSlider(), firstWidth)
+                .withSecond(miniResult.build(this), secondWidth)
+                .withSavedInstance(savedInstanceState)
+                .build();
+
+        //define the crossfader to be used with the miniDrawer. This is required to be able to automatically toggle open / close
+        miniResult.withCrossFader(new CrossfadeWrapper(crossFader));
+
+        //define a shadow (this is only for normal LTR layouts if you have a RTL app you need to define the other one
+        crossFader.getCrossFadeSlidingPaneLayout().setShadowResourceLeft(R.drawable.material_drawer_shadow_left);
+
+        // updateOnOrientation();
+    }
+
+    private void createAccountHeader(Bundle savedInstanceState) {
 
         // Create a few sample profile
         // NOTE you have to define the loader logic too. See the CustomApplication for more details
@@ -86,7 +116,6 @@ public class MiniDrawerActivity extends AppCompatActivity {
         final IProfile profile5 = new ProfileDrawerItem().withName("Mr. X").withEmail("mister.x.super@gmail.com").withIcon(getResources().getDrawable(R.drawable.profile4)).withIdentifier(4);
         final IProfile profile6 = new ProfileDrawerItem().withName("Batman").withEmail("batman@gmail.com").withIcon(getResources().getDrawable(R.drawable.profile5));
 
-        // Create the AccountHeader
         headerResult = new AccountHeaderBuilder()
                 .withActivity(this)
                 .withHeaderBackground(R.drawable.header)
@@ -124,21 +153,18 @@ public class MiniDrawerActivity extends AppCompatActivity {
                 .withSavedInstance(savedInstanceState)
                 .build();
 
+    }
+
+    private void buildDrawer(Bundle savedInstanceState, Toolbar toolbar) {
+
         result = new DrawerBuilder()
                 .withActivity(this)
                 .withToolbar(toolbar)
                 .withTranslucentStatusBar(false)
                 .withAccountHeader(headerResult) //set the AccountHeader we created earlier for the header
                 .addDrawerItems(
-//                        new PrimaryDrawerItem().withName(R.string.drawer_item_compact_header).withIcon(GoogleMaterial.Icon.gmd_sun).withIdentifier(1),
-//                        new PrimaryDrawerItem().withName(R.string.drawer_item_action_bar_drawer).withIcon(FontAwesome.Icon.faw_home).withBadge("22").withBadgeStyle(new BadgeStyle(Color.RED, Color.RED)).withIdentifier(2).withSelectable(false),
                         new PrimaryDrawerItem().withName(R.string.drawer_item_multi_drawer).withIcon(FontAwesome.Icon.faw_gamepad).withIdentifier(3),
                         new PrimaryDrawerItem().withName(R.string.drawer_item_non_translucent_status_drawer).withIcon(FontAwesome.Icon.faw_eye).withIdentifier(4),
-//                        new PrimaryDrawerItem().withDescription("A more complex sample").withName(R.string.drawer_item_advanced_drawer).withIcon(GoogleMaterial.Icon.gmd_adb).withIdentifier(5),
-//                        new PrimaryDrawerItem().withName(R.string.drawer_item_keyboard_util_drawer).withIcon(GoogleMaterial.Icon.gmd_labels).withIdentifier(6),
-//                        new SectionDrawerItem().withName(R.string.drawer_item_section_header),
-//                        new SecondaryDrawerItem().withName(R.string.drawer_item_open_source).withIcon(FontAwesome.Icon.faw_github),
-//                        new SecondaryDrawerItem().withName(R.string.drawer_item_contact).withIcon(GoogleMaterial.Icon.gmd_format_color_fill).withTag("Bullhorn"),
                         new DividerDrawerItem(),
                         new SwitchDrawerItem().withName("Switch").withIcon(Octicons.Icon.oct_tools).withChecked(true).withOnCheckedChangeListener(onCheckedChangeListener),
                         new ToggleDrawerItem().withName("Toggle").withIcon(Octicons.Icon.oct_tools).withChecked(true).withOnCheckedChangeListener(onCheckedChangeListener)
@@ -176,11 +202,6 @@ public class MiniDrawerActivity extends AppCompatActivity {
                                 updateFragment(fragment);
                             }
 
-                            if (drawerItemIdentifier == 6) {
-
-                                Intent myIntent = new Intent(MiniDrawerActivity.this, FragmentDemo1.class);
-                                MiniDrawerActivity.this.startActivity(myIntent);
-                            }
                         }
 
                         return false;
@@ -188,58 +209,10 @@ public class MiniDrawerActivity extends AppCompatActivity {
                 })
                 .withGenerateMiniDrawer(true)
                 .withSavedInstance(savedInstanceState)
-                // build only the view of the Drawer (don't inflate it automatically in our layout which is done with .build())
+                        // build only the view of the Drawer (don't inflate it automatically in our layout which is done with .build())
                 .buildView();
-
-        //the MiniDrawer is managed by the Drawer and we just get it to hook it into the Crossfader
-        miniResult = result.getMiniDrawer();
-
-        //get the widths in px for the first and second panel
-        int firstWidth = (int) UIUtils.convertDpToPixel(300, this);
-        int secondWidth = (int) UIUtils.convertDpToPixel(72, this);
-
-        //create and build our crossfader (see the MiniDrawer is also builded in here, as the build method returns the view to be used in the crossfader)
-        //the crossfader library can be found here: https://github.com/mikepenz/Crossfader
-
-// BLOCKING OUT while layout skips this element for now
-        crossFader = new Crossfader()
-                .withContent(findViewById(R.id.fragment_container)) // crossfade_content))
-                .withFirst(result.getSlider(), firstWidth)
-                .withSecond(miniResult.build(this), secondWidth)
-                .withSavedInstance(savedInstanceState)
-                .build();
-
-        //define the crossfader to be used with the miniDrawer. This is required to be able to automatically toggle open / close
-        miniResult.withCrossFader(new CrossfadeWrapper(crossFader));
-
-        //define a shadow (this is only for normal LTR layouts if you have a RTL app you need to define the other one
-        crossFader.getCrossFadeSlidingPaneLayout().setShadowResourceLeft(R.drawable.material_drawer_shadow_left);
-
-        // updateOnOrientation();
     }
 
-    private void updateOnOrientation() {
-
-        Configuration config = getResources().getConfiguration();
-
-        Fragment fragment = null;
-
-        if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            /**
-             * Landscape mode of the device
-             */
-            fragment = new LM_Fragment();
-        }
-        else
-        {
-            /**
-             * Portrait mode of the device
-             */
-            fragment = new PM_Fragment();
-        }
-
-        updateFragment(fragment);
-    }
 
     private OnCheckedChangeListener onCheckedChangeListener = new OnCheckedChangeListener() {
         @Override
@@ -297,4 +270,47 @@ public class MiniDrawerActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
+
+
+    // ================================
+    // ============================
+
+    class BakUp {
+
+        private void updateOnOrientation() {
+
+            Configuration config = getResources().getConfiguration();
+
+            Fragment fragment = null;
+
+            if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                /**
+                 * Landscape mode of the device
+                 */
+                fragment = new LM_Fragment();
+            }
+            else
+            {
+                /**
+                 * Portrait mode of the device
+                 */
+                fragment = new PM_Fragment();
+            }
+
+            updateFragment(fragment);
+        }
+
+        //    new PrimaryDrawerItem().withName(R.string.drawer_item_compact_header).withIcon(GoogleMaterial.Icon.gmd_sun).withIdentifier(1),
+        //    new PrimaryDrawerItem().withName(R.string.drawer_item_action_bar_drawer).withIcon(FontAwesome.Icon.faw_home).withBadge("22").withBadgeStyle(new BadgeStyle(Color.RED, Color.RED)).withIdentifier(2).withSelectable(false),
+        //    new PrimaryDrawerItem().withDescription("A more complex sample").withName(R.string.drawer_item_advanced_drawer).withIcon(GoogleMaterial.Icon.gmd_adb).withIdentifier(5),
+        //    new PrimaryDrawerItem().withName(R.string.drawer_item_keyboard_util_drawer).withIcon(GoogleMaterial.Icon.gmd_labels).withIdentifier(6),
+        //    new SectionDrawerItem().withName(R.string.drawer_item_section_header),
+        //    new SecondaryDrawerItem().withName(R.string.drawer_item_open_source).withIcon(FontAwesome.Icon.faw_github),
+        //    new SecondaryDrawerItem().withName(R.string.drawer_item_contact).withIcon(GoogleMaterial.Icon.gmd_format_color_fill).withTag("Bullhorn"),
+
+    }
 }
+
+
+
+
